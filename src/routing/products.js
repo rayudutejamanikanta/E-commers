@@ -1,45 +1,33 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom"; // Correct import for Link
+import { createClient } from "@supabase/supabase-js"; // Import Supabase client
+
+// Initialize Supabase client
+// IMPORTANT: Use your actual Supabase project URL and public anon key.
+const supabaseUrl = "https://mrboihookikugdivqzlb.supabase.co"; // Your Supabase URL
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yYm9paG9va2lrdWdkaXZxemxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5MDQwNjMsImV4cCI6MjA2MzQ4MDA2M30.CZjpYiLtxXgl4SdUxtXI2hWKFNj1ODgd5LRO4H8NZyU"; // Your Supabase Anon Key
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 function Products() {
-  const [clothingCategory, setClothingCategory] = useState(null);
-  const [vegetableCategory, setVegetableCategory] = useState(null);
-  const [fruitCategory, setFruitCategory] = useState(null);
-  const [flowerCategory, setFlowerCategory] = useState(null);
+  const [categoriesData, setCategoriesData] = useState([]); // Store all categories in one state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://localhost:5001/categories", {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        // Fetch all data from the 'categories' table in Supabase
+        const { data, error: fetchError } = await supabase
+          .from("categories") // Your table name
+          .select("*"); // Select all columns
 
-        const data = response.data;
+        if (fetchError) {
+          throw fetchError;
+        }
 
-        const clothingData = data.find(
-          (category) => category.category.toLowerCase() === "clothing"
-        );
-        const vegetableData = data.find(
-          (category) => category.category.toLowerCase() === "vegetables"
-        );
-        const fruitData = data.find(
-          (category) => category.category.toLowerCase() === "fruits"
-        );
-        const flowerData = data.find(
-          (category) => category.category.toLowerCase() === "flowers"
-        );
-
-
-        setClothingCategory(clothingData || null);
-        setVegetableCategory(vegetableData || null);
-        setFruitCategory(fruitData || null);
-        setFlowerCategory(flowerData || null);
+        setCategoriesData(data || []); // Set the fetched data
       } catch (error) {
+        console.error("Error fetching categories from Supabase:", error.message);
         setError("Error fetching products. Please try again later.");
       } finally {
         setLoading(false);
@@ -47,7 +35,7 @@ function Products() {
     };
 
     fetchCategories();
-  }, []);
+  }, []); // Empty dependency array means this runs once on mount
 
   if (error) {
     return <p className="error-message">{error}</p>;
@@ -57,115 +45,49 @@ function Products() {
     return <p>Loading products...</p>;
   }
 
+  // Helper function to render a category section
+  const renderCategorySection = (categoryName) => {
+    const category = categoriesData.find(
+      (cat) => cat.category.toLowerCase() === categoryName.toLowerCase()
+    );
+
+    if (!category || !Array.isArray(category.items) || category.items.length === 0) {
+      return <p>No {categoryName} products found.</p>;
+    }
+
+    return (
+      <div className="category-section">
+        <h2>{category.category.toUpperCase()}</h2>
+        <div className="items-container">
+          {category.items.map((item, index) => (
+            <div key={`${category.category}-${item.productName}-${index}`} className="product-card">
+              <Link
+                to={`/home/fulldetails`}
+                state={{
+                  image: item.image, // Correct: pass the current item's image
+                  productName: item.productName, // Correct: pass the current item's product name
+                  price: item.price, // Correct: pass the current item's price
+                }}
+              >
+                <img src={item.image} alt={item.productName} /> {/* Correct: alt is item.productName */}
+                <h3>{item.productName}</h3> {/* Correct: display item.productName */}
+                <p>Price: ₹{item.price}</p> {/* Using ₹ for Rupee symbol */}
+              </Link>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="products-container">
-      {clothingCategory ? (
-
-        <div className="category-section">
-          <h2>{clothingCategory.category.toUpperCase()}</h2>
-          <div className="items-container">
-            {clothingCategory.items.map((item) => (
-              <div key={`clothing-${item.id}`} className="product-card">
-
-                <Link
-                  to={`/home/fulldetails`}
-                  state={{
-                    image: clothingCategory.items[0].image,
-                    productName: clothingCategory.items[0].productName,
-                    price: clothingCategory.items[0].price
-                  }}
-                >
-                  <img src={item.image} alt={item.name} />
-                  <h3>{item.name}</h3>
-                  <p>Price: ${item.price}</p>
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <p>No clothing products found.</p>
-      )}
-
-      {vegetableCategory ? (
-        <div className="category-section">
-          <h2>{vegetableCategory.category.toUpperCase()}</h2>
-          <div className="items-container">
-            {vegetableCategory.items.map((item) => (
-              <div key={`vegetable-${item.id}`} className="product-card">
-
-                <Link
-                  to={`/home/fulldetails`}
-                  state={{
-                    image: clothingCategory.items[0].image,
-                    productName: clothingCategory.items[0].productName,
-                    price: clothingCategory.items[0].price
-                  }}
-                >
-                  <img src={item.image} alt={item.name} />
-                  <h3>{item.name}</h3>
-                  <p>Price: ${item.price}</p>
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <p>No vegetable products found.</p>
-      )}
-      {fruitCategory ? (
-        <div className="category-section">
-          <h2>{fruitCategory.category.toUpperCase()}</h2>
-          <div className="items-container">
-            {fruitCategory.items.map((item) => (
-              <div key={`fruit-${item.id}`} className="product-card">
-
-                <Link
-                  to={`/home/fulldetails`}
-                  state={{
-                    image: fruitCategory.items[0].image,
-                    productName: fruitCategory.items[0].productName,
-                    price: fruitCategory.items[0].price
-                  }}
-                >
-                  <img src={item.image} alt={item.name} />
-                  <h3>{item.name}</h3>
-                  <p>Price: ${item.price}</p>
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <p>No fruit products found.</p>
-      )}
-      {flowerCategory ? (
-        <div className="category-section">
-          <h2>{flowerCategory.category.toUpperCase()}</h2>
-          <div className="items-container">
-            {flowerCategory.items.map((item) => (
-              <div key={`flower-${item.id}`} className="product-card">
-
-                <Link
-                  to={`/home/fulldetails`}
-                  state={{
-                    image: flowerCategory.items[0].image,
-                    productName: flowerCategory.items[0].productName,
-                    price: flowerCategory.items[0].price
-                  }}
-                >
-                  <img src={item.image} alt={item.name} />
-                  <h3>{item.name}</h3>
-                  <p>Price: ${item.price}</p>
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <p>No flower products found.</p>
-      )}
+      {renderCategorySection("clothing")}
+      {renderCategorySection("vegetables")}
+      {renderCategorySection("fruits")}
+      {renderCategorySection("flowers")}
     </div>
   );
 }
+
 export default Products;

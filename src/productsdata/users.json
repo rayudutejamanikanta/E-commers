@@ -1,0 +1,46 @@
+{
+  "users": [
+    {
+      "id": "3bac",
+      "firstName": "Teja",
+      "lastName": "Rayudu",
+      "email": "tejamanikanta01@gmail.com",
+      "password": "Tej@9999"
+    },
+    {
+      "id": "2360",
+      "firstName": "mounika",
+      "lastName": "mani",
+      "email": "mounikamani17@gmail.com",
+      "password": "mani1727"
+    },
+    {
+      "id": "e7bb",
+      "firstName": "sumana",
+      "lastName": "yeddu",
+      "email": "sumanayeddu@gmail.com",
+      "password": "sumana1234"
+    },
+    {
+      "id": "7398",
+      "firstName": "anusha",
+      "lastName": "medamoni",
+      "email": "anusha@123gmail.com",
+      "password": "863920"
+    },
+    {
+      "id": "85ae",
+      "firstName": "gopi",
+      "lastName": "goud",
+      "email": "govardhangoud1995@gmail.com",
+      "password": "gopigoud"
+    },
+    {
+      "id": "149b",
+      "firstName": "Sai",
+      "lastName": "Krishna",
+      "email": "saikrishna@gmail.com",
+      "password": "SaiKrishna"
+    }
+  ]
+}
